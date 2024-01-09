@@ -12,3 +12,7 @@ type Todo struct {
 	CreatedAt   time.Time
 	CompletedAt *time.Time
 }
+
+func (t Todo) FormatCreatedAt() string {
+	return t.CreatedAt.Format(time.ANSIC)
+}

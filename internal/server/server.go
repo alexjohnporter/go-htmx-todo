@@ -19,13 +19,17 @@ type Server struct {
 	todoRepository repository.TodoRepository
 }
 
-func NewServer() *http.Server {
-	port, _ := strconv.Atoi(os.Getenv("PORT"))
-	db := database.New()
+func NewServer(db database.Service, todoRepository repository.TodoRepository) (*http.Server, error) {
+	portStr := os.Getenv("PORT")
+	port, err := strconv.Atoi(portStr)
+	if err != nil {
+		return nil, fmt.Errorf("failed to convert PORT to integer: %v", err)
+	}
+
 	NewServer := &Server{
 		port:           port,
 		db:             db,
-		todoRepository: repository.NewPostgresTodoRepository(db.GetDB()),
+		todoRepository: todoRepository,
 	}
 
 	// Declare Server config
@@ -37,5 +41,5 @@ func NewServer() *http.Server {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	return server
+	return server, nil
 }
