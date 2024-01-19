@@ -3,6 +3,7 @@ package repository
 import (
 	"database/sql"
 	"go-htmx-todo/internal/model"
+	"time"
 )
 
 type PostgreSQLTodoRepository struct {
@@ -57,17 +58,27 @@ func (r *PostgreSQLTodoRepository) GetOutstanding() ([]model.Todo, error) {
 	return todos, nil
 }
 
-// // GetByID retrieves a todo by its ID from the PostgreSQL repository
-// func (r *PostgreSQLTodoRepository) GetByID(id int) (*model.Todo, error) {
-// 	// Implementation...
-// }
+func (r *PostgreSQLTodoRepository) Create(todo model.Todo) (*model.Todo, error) {
+	sqlStatement := `
+		INSERT INTO todos (id, name, created_at) 
+		VALUES ($1, $2, $3);
+	`
+	_, err := r.db.Exec(sqlStatement, todo.ID, todo.Name, todo.CreatedAt)
+	if err != nil {
+		return nil, err
+	}
 
-// // Create adds a new todo to the PostgreSQL repository
-// func (r *PostgreSQLTodoRepository) Create(todo model.Todo) (*model.Todo, error) {
-// 	// Implementation...
-// }
+	return &todo, nil
+}
 
-// // Update modifies an existing todo in the PostgreSQL repository
-// func (r *PostgreSQLTodoRepository) Update(id int, updatedTodo model.Todo) (*model.Todo, error) {
-// 	// Implementation...
-// }
+func (r *PostgreSQLTodoRepository) Complete(id string) error {
+	sqlStatement := `
+		UPDATE todo SET completed_at = $1 WHERE id = $2`
+	_, err := r.db.Exec(sqlStatement, id, time.Now())
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

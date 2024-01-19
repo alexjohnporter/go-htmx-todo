@@ -11,33 +11,48 @@
 
     <div class="container">
         <h1 class="text-center mb-4">My Todos</h1>
+        <form class="mt-2" hx-post="/add-todo" hx-target="#todo-list" hx-swap="beforeend" hx-indicator="#spinner">
+            <div class="input-group mb-3">
+                <input 
+                    type="text" 
+                    class="form-control" 
+                    name="todo-name"
+                    id="todo-name"
+                    placeholder="What is your todo?" 
+                    aria-label="What is your todo?"
+                    required
+                    >
+                <button class="btn btn-primary" type="submit" id="todo-submit">
+                   Add Todo
+                   <span class="spinner-border spinner-border-sm htmx-indicator" id="spinner" role="status" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
         <ul class="list-group" id="todo-list">    
         {{ range .Todos }}
             {{ block "todo-element" .}}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     {{ .Name }}
-                    <span class="badge bg-primary">Created at: {{ .FormatCreatedAt }}</span>
+                    <div>
+                        <span class="badge bg-primary">Created at: {{ .FormatCreatedAt }}</span>
+                    <button
+                        class="btn btn-outline-primary"
+                        type="button"
+                        hx-post="/complete"
+                        hx-trigger="click"
+                        hx-vals=""
+                        hx-target="#todo-list"
+                    >
+                    Complete
+                    </button>
+                    </div>
+                    
                 </li>
             {{ end }}
         {{ end }}
         </ul>
 
-            <form class="mt-2" hx-post="/add-todo" hx-target="#todo-list" hx-swap="beforeend" hx-indicator="#spinner">
-                <div class="input-group mb-3">
-                    <input 
-                        type="text" 
-                        class="form-control" 
-                        name="todo-name"
-                        id="todo-name"
-                        placeholder="What is your todo?" 
-                        aria-label="What is your todo?"
-                        >
-                    <button class="btn btn-primary" type="submit" id="todo-submit">
-                       Add Todo
-                       <span class="spinner-border spinner-border-sm htmx-indicator" id="spinner" role="status" aria-hidden="true"></span>
-                    </button>
-                </div>
-            </form>
+            
         </div>
 
     <!-- Bootstrap JS (optional, if you need JavaScript features) -->

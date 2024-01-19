@@ -43,11 +43,49 @@ func (s *Server) GetAllHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) AddTodoHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl := template.Must(template.ParseFiles("./web/index.html"))
-	tmpl.ExecuteTemplate(w, "todo-element", model.Todo{
+
+	err := r.ParseForm()
+
+	if err != nil {
+		log.Fatalf("Error parsing form data. Err: %v", err)
+	}
+
+	todoName := r.Form.Get("todo-name")
+
+	if todoName == "" {
+		http.Error(w, "Input cannot be empty", http.StatusBadRequest)
+		return
+	}
+
+	todo := model.Todo{
 		ID:        uuid.New(),
-		Name:      "FooBar",
+		Name:      todoName,
 		CreatedAt: time.Now(),
-	})
+	}
+
+	_, todoErr := s.todoRepository.Create(todo)
+
+	if todoErr != nil {
+		log.Fatalf("Error saving Todo. Err: %v", todoErr)
+	}
+
+	tmpl.ExecuteTemplate(w, "todo-element", todo)
+}
+
+func (s *Server) CompleteHandler(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		http.Error(w, "Error parsing form data", http.StatusBadRequest)
+		return
+	}
+
+	id := r.Form.Get("id")
+	if id == "" {
+		http.Error(w, "Todo ID is missing", http.StatusBadRequest)
+		return
+	}
+
+	s.todoRepository.Complete(id)
 }
 
 func (s *Server) GetOutstandingHandler(w http.ResponseWriter, r *http.Request) {
